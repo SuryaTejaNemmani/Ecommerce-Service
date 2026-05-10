@@ -49,8 +49,7 @@ const products = [
 
 const seedProducts = async () => {
 	try {
-		const mongoUri = process.env.MONGO_URI || "mongodb+srv://nemmanisuryateja_db_user:4XDjS9zP2K4NaL0f@ecommerce.grzrvl5.mongodb.net/?appName=ECommerce";
-		
+		const mongoUri = process.env.MONGO_URI
 		await mongoose.connect(mongoUri);
 		console.log('DB connected');
 
