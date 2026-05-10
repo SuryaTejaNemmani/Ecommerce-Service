@@ -1,3 +1,4 @@
+import './AnalyticsTab.css';
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import axios from "../lib/axios";
@@ -35,46 +36,42 @@ const AnalyticsTab = () => {
 	}
 
 	return (
-		<div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-			<div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8'>
+		<div>
+			<div className='analytics-grid'>
 				<AnalyticsCard
 					title='Total Users'
 					value={analyticsData.users.toLocaleString()}
 					icon={Users}
-					color='from-emerald-500 to-teal-700'
 				/>
 				<AnalyticsCard
 					title='Total Products'
 					value={analyticsData.products.toLocaleString()}
 					icon={Package}
-					color='from-emerald-500 to-green-700'
 				/>
 				<AnalyticsCard
 					title='Total Sales'
 					value={analyticsData.totalSales.toLocaleString()}
 					icon={ShoppingCart}
-					color='from-emerald-500 to-cyan-700'
 				/>
 				<AnalyticsCard
 					title='Total Revenue'
 					value={`₹${analyticsData.totalRevenue.toLocaleString()}`}
 					icon={IndianRupee}
-					color='from-emerald-500 to-lime-700'
 				/>
 			</div>
 			<motion.div
-				className='bg-gray-800/60 rounded-lg p-6 shadow-lg'
+				className='analytics-chart'
 				initial={{ opacity: 0, y: 20 }}
 				animate={{ opacity: 1, y: 0 }}
 				transition={{ duration: 0.5, delay: 0.25 }}
 			>
 				<ResponsiveContainer width='100%' height={400}>
 					<LineChart data={dailySalesData}>
-						<CartesianGrid strokeDasharray='3 3' />
+						<CartesianGrid strokeDasharray='3 3' stroke="#4b5563" />
 						<XAxis dataKey='name' stroke='#D1D5DB' />
 						<YAxis yAxisId='left' stroke='#D1D5DB' />
 						<YAxis yAxisId='right' orientation='right' stroke='#D1D5DB' />
-						<Tooltip />
+						<Tooltip contentStyle={{ backgroundColor: '#1f2937', borderColor: '#4b5563', color: '#fff' }} />
 						<Legend />
 						<Line
 							yAxisId='left'
@@ -95,27 +92,50 @@ const AnalyticsTab = () => {
 					</LineChart>
 				</ResponsiveContainer>
 			</motion.div>
+			
+			<motion.div
+				className='analytics-table-wrap'
+				initial={{ opacity: 0, y: 20 }}
+				animate={{ opacity: 1, y: 0 }}
+				transition={{ duration: 0.5, delay: 0.35 }}
+			>
+				<h2 className='analytics-table-title'>Product Sales Performance</h2>
+				<table className='analytics-table'>
+					<thead>
+						<tr>
+							<th>Product Name</th>
+							<th>Units Sold</th>
+							<th>Revenue Generated</th>
+						</tr>
+					</thead>
+					<tbody>
+						{analyticsData.productSales?.map((product) => (
+							<tr key={product._id}>
+								<td className='analytics-table__name'>{product.name}</td>
+								<td>{product.sales}</td>
+								<td className='analytics-table__value'>₹{product.revenue.toLocaleString()}</td>
+							</tr>
+						))}
+					</tbody>
+				</table>
+			</motion.div>
 		</div>
 	);
 };
 export default AnalyticsTab;
 
-const AnalyticsCard = ({ title, value, icon: Icon, color }) => (
+const AnalyticsCard = ({ title, value, icon: Icon }) => (
 	<motion.div
-		className={`bg-gray-800 rounded-lg p-6 shadow-lg overflow-hidden relative ${color}`}
+		className='analytics-card'
 		initial={{ opacity: 0, y: 20 }}
 		animate={{ opacity: 1, y: 0 }}
 		transition={{ duration: 0.5 }}
 	>
-		<div className='flex justify-between items-center'>
-			<div className='z-10'>
-				<p className='text-emerald-300 text-sm mb-1 font-semibold'>{title}</p>
-				<h3 className='text-white text-3xl font-bold'>{value}</h3>
-			</div>
+		<div style={{ position: 'relative', zIndex: 10 }}>
+			<p className='analytics-card__label'>{title}</p>
+			<h3 className='analytics-card__value'>{value}</h3>
 		</div>
-		<div className='absolute inset-0 bg-gradient-to-br from-emerald-600 to-emerald-900 opacity-30' />
-		<div className='absolute -bottom-4 -right-4 text-emerald-800 opacity-50'>
-			<Icon className='h-32 w-32' />
-		</div>
+		<div className='analytics-card__bg'></div>
+		<Icon size={128} className='analytics-card__icon' />
 	</motion.div>
 );

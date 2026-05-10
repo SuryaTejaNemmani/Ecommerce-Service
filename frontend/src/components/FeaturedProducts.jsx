@@ -1,12 +1,13 @@
+import './FeaturedProducts.css';
 import { useEffect, useState } from "react";
 import { ShoppingCart, ChevronLeft, ChevronRight } from "lucide-react";
-import { useCartStore } from "../stores/useCartStore";
+import { useCart } from "../context/CartContext";
 
 const FeaturedProducts = ({ featuredProducts }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(4);
 
-  const { addToCart } = useCartStore();
+  const { addToCart } = useCart();
 
   useEffect(() => {
     const handleResize = () => {
@@ -14,7 +15,6 @@ const FeaturedProducts = ({ featuredProducts }) => {
       else if (window.innerWidth < 1024) setItemsPerPage(2);
       else if (window.innerWidth < 1280) setItemsPerPage(3);
       else setItemsPerPage(4);
-      console.log(featuredProducts);
     };
 
     handleResize();
@@ -34,15 +34,13 @@ const FeaturedProducts = ({ featuredProducts }) => {
   const isEndDisabled = currentIndex >= featuredProducts.length - itemsPerPage;
 
   return (
-    <div className="py-12">
-      <div className="container mx-auto px-4">
-        <h2 className="text-center text-5xl sm:text-6xl font-bold text-emerald-400 mb-4">
-          Featured
-        </h2>
-        <div className="relative">
-          <div className="overflow-hidden">
+    <div className="featured">
+      <div className="container">
+        <h2 className="featured__title">Featured</h2>
+        <div className="featured__slider">
+          <div className="featured__track-wrap" style={{ overflow: "hidden" }}>
             <div
-              className="flex transition-transform duration-300 ease-in-out"
+              className="featured__track"
               style={{
                 transform: `translateX(-${
                   currentIndex * (100 / itemsPerPage)
@@ -50,32 +48,26 @@ const FeaturedProducts = ({ featuredProducts }) => {
               }}
             >
               {featuredProducts.length > 0 ? (
-                featuredProducts?.map((product) => (
+                featuredProducts.map((product) => (
                   <div
                     key={product._id}
-                    className="w-full sm:w-1/2 lg:w-1/3 xl:w-1/4 flex-shrink-0 px-2"
+                    className="featured__slide"
+                    style={{ width: `${100 / itemsPerPage}%` }}
                   >
-                    <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-lg shadow-lg overflow-hidden h-full transition-all duration-300 hover:shadow-xl border border-emerald-500/30">
-                      <div className="overflow-hidden">
-                        <img
-                          src={product.image}
-                          alt={product.name}
-                          className="w-full h-48 object-cover transition-transform duration-300 ease-in-out hover:scale-110"
-                        />
-                      </div>
-                      <div className="p-4">
-                        <h3 className="text-lg font-semibold mb-2 text-white">
-                          {product.name}
-                        </h3>
-                        <p className="text-emerald-300 font-medium mb-4">
-                        ₹{product.price.toFixed(2)}
-                        </p>
+                    <div className="featured__card">
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className="featured__card-img"
+                      />
+                      <div className="featured__card-body">
+                        <h3 className="featured__card-name">{product.name}</h3>
+                        <p className="featured__card-price">₹{product.price.toFixed(2)}</p>
                         <button
                           onClick={() => addToCart(product)}
-                          className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2 px-4 rounded transition-colors duration-300 
-												flex items-center justify-center"
+                          className="btn btn--primary btn--full"
                         >
-                          <ShoppingCart className="w-5 h-5 mr-2" />
+                          <ShoppingCart size={20} />
                           Add to Cart
                         </button>
                       </div>
@@ -83,32 +75,29 @@ const FeaturedProducts = ({ featuredProducts }) => {
                   </div>
                 ))
               ) : (
-                <></>
+                null
               )}
             </div>
           </div>
+          
           <button
             onClick={prevSlide}
             disabled={isStartDisabled}
-            className={`absolute top-1/2 -left-4 transform -translate-y-1/2 p-2 rounded-full transition-colors duration-300 ${
-              isStartDisabled
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-emerald-600 hover:bg-emerald-500"
+            className={`slider-btn slider-btn--prev ${
+              isStartDisabled ? "slider-btn--disabled" : "slider-btn--active"
             }`}
           >
-            <ChevronLeft className="w-6 h-6" />
+            <ChevronLeft size={24} />
           </button>
 
           <button
             onClick={nextSlide}
             disabled={isEndDisabled}
-            className={`absolute top-1/2 -right-4 transform -translate-y-1/2 p-2 rounded-full transition-colors duration-300 ${
-              isEndDisabled
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-emerald-600 hover:bg-emerald-500"
+            className={`slider-btn slider-btn--next ${
+              isEndDisabled ? "slider-btn--disabled" : "slider-btn--active"
             }`}
           >
-            <ChevronRight className="w-6 h-6" />
+            <ChevronRight size={24} />
           </button>
         </div>
       </div>

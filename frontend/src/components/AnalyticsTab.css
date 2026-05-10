@@ -1,0 +1,113 @@
+.analytics-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+@media(min-width:640px) {
+  .analytics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media(min-width:1024px) {
+  .analytics-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.analytics-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow);
+  position: relative;
+  overflow: hidden;
+}
+
+.analytics-card__label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--accent-light);
+  margin-bottom: 0.25rem;
+}
+
+.analytics-card__value {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.analytics-card__bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #059669, #065f46);
+  opacity: 0.25;
+  pointer-events: none;
+}
+
+.analytics-card__icon {
+  position: absolute;
+  bottom: -1rem;
+  right: -1rem;
+  color: #065f46;
+  opacity: 0.5;
+}
+
+.analytics-chart {
+  background: rgba(31, 41, 55, 0.6);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow);
+  margin-bottom: 2rem;
+}
+
+.analytics-table-wrap {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow);
+  overflow-x: auto;
+}
+
+.analytics-table-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: #fff;
+}
+
+.analytics-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.analytics-table th {
+  text-align: left;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.analytics-table td {
+  padding: 1rem;
+  font-size: 0.875rem;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.analytics-table tr:hover td {
+  background: rgba(255,255,255,0.02);
+}
+
+.analytics-table__name {
+  font-weight: 600;
+  color: #fff;
+}
+
+.analytics-table__value {
+  color: var(--accent);
+  font-weight: 500;
+}
+

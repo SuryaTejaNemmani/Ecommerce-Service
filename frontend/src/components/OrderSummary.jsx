@@ -1,108 +1,133 @@
+import './OrderSummary.css';
 import { motion } from "framer-motion";
-import { useCartStore } from "../stores/useCartStore";
+import { useCart } from "../context/CartContext";
 import { Link } from "react-router-dom";
 import { MoveRight } from "lucide-react";
-import { loadStripe } from "@stripe/stripe-js";
+import { loadRazorpayScript } from "../utils/razorpay";
 import axios from "../lib/axios";
 
-const stripePromise = loadStripe(
-	"pk_test_51QsL6H2MyhlMzzDPrUBl2xz3EdtxjORxTnhxNmYJgdMS2Ret7W5MtHZdHRdfyos7q6CVZHzSyxWAeGarK6unKXM200byr1BiwL"
-);
-
 const OrderSummary = () => {
-	const { total, subtotal, coupon, isCouponApplied, cart } = useCartStore();
+	const { total, subtotal, coupon, isCouponApplied, cart } = useCart();
 
 	const savings = subtotal - total;
 	const formattedSubtotal = subtotal.toFixed(2);
 	const formattedTotal = total.toFixed(2);
 	const formattedSavings = savings.toFixed(2);
 
-	const handlePayment = async () => {
-		const stripe = await stripePromise;
+	const handleRazorpayCheckout = async () => {
 		try {
-			const res = await axios.post("/payments/create-checkout-session", {
+			const res = await loadRazorpayScript("https://checkout.razorpay.com/v1/checkout.js");
+
+			if (!res) {
+				alert("Razorpay SDK failed to load. Are you online?");
+				return;
+			}
+
+			// 1. Create order on backend
+			const response = await axios.post("/payments/create-order", {
 				products: cart,
 				couponCode: coupon ? coupon.code : null,
 			});
 
-			const session = res.data;
-			if (!session.id) {
-				console.error("No session ID returned from the backend:", session);
-				return;
-			}
+			const { orderId, currency, amount, keyId } = response.data;
 
-			console.log("Session Data: ", session)
-			console.log("Session url", session.url)
+			// 2. Initialize Razorpay Checkout
+			const options = {
+				key: keyId, 
+				amount: amount.toString(),
+				currency: currency,
+				name: "SkyMart",
+				description: "Test Transaction",
+				order_id: orderId,
+				handler: async function (response) {
+					// 3. Verify payment on backend
+					const data = {
+						razorpay_payment_id: response.razorpay_payment_id,
+						razorpay_order_id: response.razorpay_order_id,
+						razorpay_signature: response.razorpay_signature,
+						products: cart,
+						couponCode: coupon ? coupon.code : null,
+					};
 
-			// const result = await stripe.redirectToCheckout({
-			// 	sessionId: session.id,
-			// });
+					const verifyResponse = await axios.post("/payments/verify-payment", data);
 
-			// if (result.error) {
-			// 	console.error("Error during redirection:", result.error);
-			// }
-			window.location.href = session.url;	
+					if (verifyResponse.data.success) {
+						window.location.href = `/purchase-success?orderId=${verifyResponse.data.orderId}`;
+					} else {
+						window.location.href = "/purchase-cancel";
+					}
+				},
+				prefill: {
+					name: "John Doe", 
+					email: "john.doe@example.com",
+					contact: "9999999999"
+				},
+				theme: {
+					color: "#10b981"
+				}
+			};
+
+			const paymentObject = new window.Razorpay(options);
+			paymentObject.on('payment.failed', function () {
+				window.location.href = "/purchase-cancel";
+			});
+			
+			paymentObject.open();
 
 		} catch (error) {
-			console.error("Error creating checkout session:", error);
-
+			console.error("Payment initiation failed:", error);
 		}
 	};
 
 	return (
 		<motion.div
-			className='space-y-4 rounded-lg border border-gray-700 bg-gray-800 p-4 shadow-sm sm:p-6'
+			className='summary-card'
 			initial={{ opacity: 0, y: 20 }}
 			animate={{ opacity: 1, y: 0 }}
 			transition={{ duration: 0.5 }}
 		>
-			<p className='text-xl font-semibold text-emerald-400'>Order summary</p>
+			<h2 className='summary-card__title'>Order summary</h2>
 
-			<div className='space-y-4'>
-				<div className='space-y-2'>
-					<dl className='flex items-center justify-between gap-4'>
-						<dt className='text-base font-normal text-gray-300'>Original price</dt>
-						<dd className='text-base font-medium text-white'>₹{formattedSubtotal}</dd>
-					</dl>
+			<div className='summary-row'>
+				<span className='summary-row__label'>Original price</span>
+				<span className='summary-row__value'>₹{formattedSubtotal}</span>
+			</div>
 
-					{savings > 0 && (
-						<dl className='flex items-center justify-between gap-4'>
-							<dt className='text-base font-normal text-gray-300'>Savings</dt>
-							<dd className='text-base font-medium text-emerald-400'>-₹{formattedSavings}</dd>
-						</dl>
-					)}
-
-					{coupon && isCouponApplied && (
-						<dl className='flex items-center justify-between gap-4'>
-							<dt className='text-base font-normal text-gray-300'>Coupon ({coupon.code})</dt>
-							<dd className='text-base font-medium text-emerald-400'>-{coupon.discountPercentage}%</dd>
-						</dl>
-					)}
-					<dl className='flex items-center justify-between gap-4 border-t border-gray-600 pt-2'>
-						<dt className='text-base font-bold text-white'>Total</dt>
-						<dd className='text-base font-bold text-emerald-400'>₹{formattedTotal}</dd>
-					</dl>
+			{savings > 0 && (
+				<div className='summary-row'>
+					<span className='summary-row__label'>Savings</span>
+					<span className='summary-row__value summary-row__value--accent'>-₹{formattedSavings}</span>
 				</div>
+			)}
 
-				<motion.button
-					className='flex w-full items-center justify-center rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 focus:outline-none focus:ring-4 focus:ring-emerald-300'
-					whileHover={{ scale: 1.05 }}
-					whileTap={{ scale: 0.95 }}
-					onClick={handlePayment}
-				>
-					Proceed to Checkout
-				</motion.button>
-
-				<div className='flex items-center justify-center gap-2'>
-					<span className='text-sm font-normal text-gray-400'>or</span>
-					<Link
-						to='/'
-						className='inline-flex items-center gap-2 text-sm font-medium text-emerald-400 underline hover:text-emerald-300 hover:no-underline'
-					>
-						Continue Shopping
-						<MoveRight size={16} />
-					</Link>
+			{coupon && isCouponApplied && (
+				<div className='summary-row'>
+					<span className='summary-row__label'>Coupon ({coupon.code})</span>
+					<span className='summary-row__value summary-row__value--accent'>-{coupon.discountPercentage}%</span>
 				</div>
+			)}
+
+			<div className='summary-divider'></div>
+
+			<div className='summary-row summary-total'>
+				<span className='summary-row__label'>Total</span>
+				<span className='summary-row__value summary-row__value--accent'>₹{formattedTotal}</span>
+			</div>
+
+			<button
+				className='btn btn--primary btn--full'
+				style={{ marginTop: '1.5rem' }}
+				onClick={handleRazorpayCheckout}
+			>
+				Proceed to Checkout
+			</button>
+
+			<div className='summary-links'>
+				<span>or</span>
+				<Link to='/'>
+					Continue Shopping
+					<MoveRight size={16} />
+				</Link>
 			</div>
 		</motion.div>
 	);

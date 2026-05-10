@@ -1,1 +1,227 @@
-@import 'tailwindcss'
+/* ===== DESIGN SYSTEM ===== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg-primary: #111827;
+  --bg-card: #1f2937;
+  --bg-secondary: #374151;
+  --bg-input: #374151;
+  --border: #374151;
+  --border-sub: #4b5563;
+  --text-white: #ffffff;
+  --text-light: #d1d5db;
+  --text-muted: #9ca3af;
+  --accent: #34d399;
+  --accent-light: #6ee7b7;
+  --btn-primary: #059669;
+  --btn-primary-h: #047857;
+  --btn-gray: #374151;
+  --btn-gray-h: #4b5563;
+  --red: #f87171;
+  --red-btn: #dc2626;
+  --red-btn-h: #b91c1c;
+  --yellow: #fbbf24;
+  --yellow-h: #f59e0b;
+  --radius: 0.375rem;
+  --radius-lg: 0.5rem;
+  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+  --transition: all 0.2s ease;
+}
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-white);
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font: inherit;
+}
+
+input,
+textarea,
+select {
+  font: inherit;
+  color: var(--text-white);
+}
+
+img {
+  display: block;
+}
+
+/* ===== LAYOUT ===== */
+.app {
+  min-height: 100vh;
+  background: var(--bg-primary);
+  position: relative;
+  overflow: hidden;
+}
+
+.app__bg {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at top, rgba(16, 185, 129, 0.3) 0%, rgba(10, 80, 60, 0.2) 45%, rgba(0, 0, 0, 0.1) 100%);
+  pointer-events: none;
+}
+
+.app__content {
+  position: relative;
+  z-index: 10;
+  padding-top: 5rem;
+}
+
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.page {
+  padding: 4rem 1rem;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+/* ===== BUTTONS ===== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1.25rem;
+  border-radius: var(--radius);
+  font-weight: 500;
+  font-size: 0.875rem;
+  transition: var(--transition);
+}
+
+.btn--primary {
+  background: var(--btn-primary);
+  color: #fff;
+}
+
+.btn--primary:hover {
+  background: var(--btn-primary-h);
+}
+
+.btn--gray {
+  background: var(--btn-gray);
+  color: var(--text-light);
+}
+
+.btn--gray:hover {
+  background: var(--btn-gray-h);
+}
+
+.btn--danger {
+  background: var(--red-btn);
+  color: #fff;
+}
+
+.btn--danger:hover {
+  background: var(--red-btn-h);
+}
+
+.btn--full {
+  width: 100%;
+}
+
+.btn--sm {
+  padding: 0.25rem 0.75rem;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ===== FORMS ===== */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.form-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-light);
+}
+
+.form-input-wrap {
+  position: relative;
+}
+
+.form-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  background: var(--bg-input);
+  border: 1px solid var(--border-sub);
+  border-radius: var(--radius);
+  color: var(--text-white);
+  font-size: 0.875rem;
+}
+
+.form-input--padded {
+  padding-left: 2.5rem;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--btn-primary);
+  box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.3);
+}
+
+.form-input::placeholder {
+  color: var(--text-muted);
+}
+
+textarea.form-input {
+  resize: vertical;
+}
+
+select.form-input {
+  appearance: none;
+}
+
+.form-space {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+

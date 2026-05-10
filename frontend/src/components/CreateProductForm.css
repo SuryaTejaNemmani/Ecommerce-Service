@@ -1,0 +1,45 @@
+.product-form {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  max-width: 36rem;
+  margin: 0 auto;
+  box-shadow: var(--shadow-xl);
+}
+
+.product-form__title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--accent-light);
+  margin-bottom: 1.5rem;
+}
+
+.file-upload {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.file-upload__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-sub);
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+  color: var(--text-light);
+  cursor: pointer;
+}
+
+.file-upload__label:hover {
+  background: var(--border-sub);
+}
+
+.file-upload__status {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+

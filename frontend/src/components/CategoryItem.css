@@ -1,0 +1,45 @@
+.category-item {
+  position: relative;
+  overflow: hidden;
+  height: 24rem;
+  border-radius: var(--radius-lg);
+}
+
+.category-item__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.category-item:hover .category-item__image {
+  transform: scale(1.1);
+}
+
+.category-item__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent, rgba(17, 24, 39, 0.8));
+  z-index: 1;
+}
+
+.category-item__content {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1rem;
+  z-index: 2;
+}
+
+.category-item__name {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.category-item__sub {
+  font-size: 0.875rem;
+  color: #e5e7eb;
+}
+

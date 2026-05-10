@@ -1,0 +1,101 @@
+.featured {
+  padding: 3rem 0;
+}
+
+.featured__title {
+  text-align: center;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 1.5rem;
+}
+
+.featured__slider {
+  position: relative;
+  overflow: hidden;
+}
+
+.featured__track {
+  display: flex;
+  transition: transform 0.3s ease;
+}
+
+.featured__slide {
+  flex-shrink: 0;
+  padding: 0 0.5rem;
+}
+
+.featured__card {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  height: 100%;
+  transition: box-shadow 0.3s;
+}
+
+.featured__card:hover {
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+}
+
+.featured__card-img {
+  width: 100%;
+  height: 12rem;
+  object-fit: cover;
+  transition: transform 0.3s;
+}
+
+.featured__card:hover .featured__card-img {
+  transform: scale(1.08);
+}
+
+.featured__card-body {
+  padding: 1rem;
+}
+
+.featured__card-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 0.5rem;
+}
+
+.featured__card-price {
+  color: var(--accent-light);
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+.slider-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 0.5rem;
+  border-radius: 9999px;
+  color: #fff;
+  transition: var(--transition);
+  z-index: 5;
+}
+
+.slider-btn--prev {
+  left: -1rem;
+}
+
+.slider-btn--next {
+  right: -1rem;
+}
+
+.slider-btn--active {
+  background: var(--btn-primary);
+}
+
+.slider-btn--active:hover {
+  background: #10b981;
+}
+
+.slider-btn--disabled {
+  background: var(--text-muted);
+  cursor: not-allowed;
+}
+

@@ -1,0 +1,29 @@
+.also-bought {
+  margin-top: 2rem;
+}
+
+.also-bought__title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 1.5rem;
+}
+
+.also-bought__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media(min-width:640px) {
+  .also-bought__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media(min-width:1024px) {
+  .also-bought__grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+

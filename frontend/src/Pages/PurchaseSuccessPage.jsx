@@ -1,99 +1,91 @@
-import { ArrowRight, CheckCircle, HandHeart } from "lucide-react";
+import './PurchaseResult.css';
+import { CheckCircle, ArrowRight, HandHeart } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { useCartStore } from "../stores/useCartStore";
+import { Link, useSearchParams } from "react-router-dom";
+import { useCart } from "../context/CartContext";
 import axios from "../lib/axios";
 import Confetti from "react-confetti";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 const PurchaseSuccessPage = () => {
 	const [isProcessing, setIsProcessing] = useState(true);
-	const { clearCart } = useCartStore();
 	const [error, setError] = useState(null);
+	const [searchParams] = useSearchParams();
+	const orderId = searchParams.get("orderId");
+	const { clearCart } = useCart();
 
 	useEffect(() => {
-		const handleCheckoutSuccess = async (sessionId) => {
-			try {
-				await axios.post("/payments/checkout-success", {
-					sessionId,
-				});
+		const handleSuccess = async () => {
+			if (orderId) {
 				clearCart();
-			} catch (error) {
-				console.log(error);
-			} finally {
-				setIsProcessing(false);
 			}
+			setIsProcessing(false);
 		};
 
-		const sessionId = new URLSearchParams(window.location.search).get("session_id");
-		if (sessionId) {
-			handleCheckoutSuccess(sessionId);
-		} else {
-			setIsProcessing(false);
-			setError("No session ID found in the URL");
-		}
-	}, [clearCart]);
+		handleSuccess();
+	}, [orderId]);
 
-	if (isProcessing) return "Processing...";
+	if (isProcessing) return <LoadingSpinner />;
 
-	if (error) return `Error: ${error}`;
+	if (error) {
+		return (
+			<div className='result-page'>
+				<div className='result-card'>
+					<h1 className='result-card__title result-card__title--cancel'>Error</h1>
+					<p className='result-card__sub'>{error}</p>
+					<div className='result-card__actions' style={{ marginTop: '2rem' }}>
+						<Link to='/' className='btn btn--primary btn--full'>
+							Return to Home
+						</Link>
+					</div>
+				</div>
+			</div>
+		);
+	}
 
 	return (
-		<div className='h-screen flex items-center justify-center px-4'>
+		<div className='result-page'>
 			<Confetti
 				width={window.innerWidth}
 				height={window.innerHeight}
 				gravity={0.1}
-				style={{ zIndex: 99 }}
+				style={{ zIndex: 99, pointerEvents: 'none' }}
 				numberOfPieces={700}
 				recycle={false}
 			/>
 
-			<div className='max-w-md w-full bg-gray-800 rounded-lg shadow-xl overflow-hidden relative z-10'>
-				<div className='p-6 sm:p-8'>
-					<div className='flex justify-center'>
-						<CheckCircle className='text-emerald-400 w-16 h-16 mb-4' />
-					</div>
-					<h1 className='text-2xl sm:text-3xl font-bold text-center text-emerald-400 mb-2'>
-						Purchase Successful!
-					</h1>
+			<div className='result-card'>
+				<div className='result-card__icon-wrap'>
+					<CheckCircle color="#10b981" size={64} />
+				</div>
+				<h1 className='result-card__title result-card__title--success'>Purchase Successful!</h1>
+				<p className='result-card__sub'>
+					Thank you for your order. We're processing it now.
+				</p>
+				<p className='result-card__note'>
+					Check your email for order details and updates.
+				</p>
 
-					<p className='text-gray-300 text-center mb-2'>
-						Thank you for your order. {"We're"} processing it now.
-					</p>
-					<p className='text-emerald-400 text-center text-sm mb-6'>
-						Check your email for order details and updates.
-					</p>
-					<div className='bg-gray-700 rounded-lg p-4 mb-6'>
-						<div className='flex items-center justify-between mb-2'>
-							<span className='text-sm text-gray-400'>Order number</span>
-							<span className='text-sm font-semibold text-emerald-400'>#12345</span>
-						</div>
-						<div className='flex items-center justify-between'>
-							<span className='text-sm text-gray-400'>Estimated delivery</span>
-							<span className='text-sm font-semibold text-emerald-400'>3-5 business days</span>
-						</div>
+				<div className='result-card__info'>
+					<div className='result-card__info-row'>
+						<span className='result-card__info-label'>Order number</span>
+						<span className='result-card__info-value'>#{orderId || "unknown"}</span>
 					</div>
+					<div className='result-card__info-row'>
+						<span className='result-card__info-label'>Estimated delivery</span>
+						<span className='result-card__info-value'>3-5 business days</span>
+					</div>
+				</div>
 
-					<div className='space-y-4'>
-						<button
-							className='w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4
-             rounded-lg transition duration-300 flex items-center justify-center'
-						>
-							<HandHeart className='mr-2' size={18} />
-							Thanks for trusting us!
-						</button>
-						<Link
-							to={"/"}
-							className='w-full bg-gray-700 hover:bg-gray-600 text-emerald-400 font-bold py-2 px-4 
-            rounded-lg transition duration-300 flex items-center justify-center'
-						>
-							Continue Shopping
-							<ArrowRight className='ml-2' size={18} />
-						</Link>
-					</div>
+				<div className='result-card__actions'>
+					<Link to='/' className='result-btn result-btn--primary'>
+						Continue Shopping
+						<ArrowRight size={18} />
+					</Link>
 				</div>
 			</div>
 		</div>
 	);
 };
+
 export default PurchaseSuccessPage;

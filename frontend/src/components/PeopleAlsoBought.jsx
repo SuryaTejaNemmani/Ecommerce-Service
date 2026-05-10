@@ -1,3 +1,4 @@
+import './PeopleAlsoBought.css';
 import { useEffect, useState } from "react";
 import ProductCard from "./ProductCard";
 import axios from "../lib/axios";
@@ -14,7 +15,7 @@ const PeopleAlsoBought = () => {
 				const res = await axios.get("/products/recommendations");
 				setRecommendations(res.data);
 			} catch (error) {
-				toast.error(error.response.data.message || "An error occurred while fetching recommendations");
+				toast.error(error.response?.data?.message || "An error occurred while fetching recommendations");
 			} finally {
 				setIsLoading(false);
 			}
@@ -26,9 +27,9 @@ const PeopleAlsoBought = () => {
 	if (isLoading) return <LoadingSpinner />;
 
 	return (
-		<div className='mt-8'>
-			<h3 className='text-2xl font-semibold text-emerald-400'>People also bought</h3>
-			<div className='mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg: grid-col-3'>
+		<div className='also-bought'>
+			<h3 className='also-bought__title'>People also bought</h3>
+			<div className='also-bought__grid'>
 				{recommendations.map((product) => (
 					<ProductCard key={product._id} product={product} />
 				))}

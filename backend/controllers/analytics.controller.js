@@ -9,7 +9,7 @@ export const getAnalyticsData = async () => {
 	const salesData = await Order.aggregate([
 		{
 			$group: {
-				_id: null, // it groups all documents together,
+				_id: null,
 				totalSales: { $sum: 1 },
 				totalRevenue: { $sum: "$totalAmount" },
 			},
@@ -18,11 +18,42 @@ export const getAnalyticsData = async () => {
 
 	const { totalSales, totalRevenue } = salesData[0] || { totalSales: 0, totalRevenue: 0 };
 
+	// Get sales per product
+	const productSalesData = await Order.aggregate([
+		{ $unwind: "$products" },
+		{
+			$group: {
+				_id: "$products.product",
+				sales: { $sum: "$products.quantity" },
+				revenue: { $sum: { $multiply: ["$products.price", "$products.quantity"] } },
+			},
+		},
+		{
+			$lookup: {
+				from: "products",
+				localField: "_id",
+				foreignField: "_id",
+				as: "productDetails",
+			},
+		},
+		{ $unwind: "$productDetails" },
+		{
+			$project: {
+				_id: 1,
+				name: "$productDetails.name",
+				sales: 1,
+				revenue: 1,
+			},
+		},
+		{ $sort: { sales: -1 } },
+	]);
+
 	return {
 		users: totalUsers,
 		products: totalProducts,
 		totalSales,
 		totalRevenue,
+		productSales: productSalesData,
 	};
 };
 
