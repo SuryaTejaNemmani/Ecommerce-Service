@@ -52,7 +52,7 @@ const data = [
 
 const seedDB = async () => {
   try {
-    await mongoose.connect("mongodb+srv://nemmanisuryateja_db_user:4XDjS9zP2K4NaL0f@ecommerce.grzrvl5.mongodb.net/?appName=ECommerce")
+    await mongoose.connect(" process.env.MONGO_URI")
     console.log('DB connected');
 
     await Order.insertMany(data);
