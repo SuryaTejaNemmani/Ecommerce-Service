@@ -39,13 +39,6 @@ export const createRazorpayOrder = async (req, res) => {
 			notes: {
 				userId: req.user._id.toString(),
 				couponCode: couponCode || "",
-				products: JSON.stringify(
-					products.map((p) => ({
-						id: p._id,
-						quantity: p.quantity,
-						price: p.price,
-					}))
-				),
 			},
 		});
 
@@ -114,6 +107,10 @@ export const verifyPayment = async (req, res) => {
 		});
 
 		await newOrder.save();
+
+		// Clear the cart after successful payment
+		req.user.cartItems = [];
+		await req.user.save();
 
 		res.status(200).json({
 			success: true,

@@ -6,7 +6,7 @@ import { MoveRight } from "lucide-react";
 import axios from "../lib/axios";
 
 const OrderSummary = () => {
-	const { total, subtotal, coupon, isCouponApplied, cart } = useCart();
+	const { total, subtotal, coupon, isCouponApplied, cart, clearCart } = useCart();
 
 	const savings = subtotal - total;
 	const formattedSubtotal = subtotal.toFixed(2);
@@ -32,20 +32,26 @@ const OrderSummary = () => {
 				description: "Test Transaction",
 				order_id: orderId,
 				handler: async function (response) {
-					// 3. Verify payment on backend
-					const data = {
-						razorpay_payment_id: response.razorpay_payment_id,
-						razorpay_order_id: response.razorpay_order_id,
-						razorpay_signature: response.razorpay_signature,
-						products: cart,
-						couponCode: isCouponApplied ? coupon.code : null,
-					};
+					try {
+						// 3. Verify payment on backend
+						const data = {
+							razorpay_payment_id: response.razorpay_payment_id,
+							razorpay_order_id: response.razorpay_order_id,
+							razorpay_signature: response.razorpay_signature,
+							products: cart,
+							couponCode: isCouponApplied ? coupon.code : null,
+						};
 
-					const verifyResponse = await axios.post("/payments/verify-payment", data);
+						const verifyResponse = await axios.post("/payments/verify-payment", data);
 
-					if (verifyResponse.data.success) {
-						window.location.href = `/purchase-success?orderId=${verifyResponse.data.orderId}`;
-					} else {
+						if (verifyResponse.data.success) {
+							clearCart();
+							window.location.href = `/purchase-success?orderId=${verifyResponse.data.orderId}`;
+						} else {
+							window.location.href = "/purchase-cancel";
+						}
+					} catch (error) {
+						console.error("Payment verification failed:", error);
 						window.location.href = "/purchase-cancel";
 					}
 				},
