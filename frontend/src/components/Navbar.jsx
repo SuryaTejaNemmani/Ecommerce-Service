@@ -29,7 +29,7 @@ const Navbar = () => {
 							)}
 						</Link>
 					)}
-					{isAdmin && (
+					{(isAdmin || user?.role === "seller") && (
 						<Link className='navbar__btn navbar__btn--primary' to={"/secret-dashboard"}>
 							<Lock size={18} />
 							<span>Dashboard</span>

@@ -4,19 +4,15 @@ import axios from "../lib/axios";
 
 const ProductContext = createContext();
 
-export const useProduct = () => {
-    return useContext(ProductContext);
-};
-
 export const ProductProvider = ({ children }) => {
-	const [products, setProductsState] = useState([]);
+	const [products, setProducts] = useState([]);
 	const [isLoading, setIsLoading] = useState(false);
 
 	const createProduct = async (productData) => {
 		setIsLoading(true);
 		try {
 			const res = await axios.post("/products", productData);
-			setProductsState((prev) => [...prev, res.data]);
+			setProducts((prev) => [...prev, res.data]);
 			setIsLoading(false);
 		} catch (error) {
 			toast.error(error.response?.data?.error || "Error creating product");
@@ -28,7 +24,7 @@ export const ProductProvider = ({ children }) => {
 		setIsLoading(true);
 		try {
 			const response = await axios.get("/products");
-			setProductsState(response.data.products);
+			setProducts(response.data.products);
 			setIsLoading(false);
 		} catch (error) {
 			setIsLoading(false);
@@ -40,7 +36,7 @@ export const ProductProvider = ({ children }) => {
 		setIsLoading(true);
 		try {
 			const response = await axios.get(`/products/category/${category}`);
-			setProductsState(response.data);
+			setProducts(response.data);
 			setIsLoading(false);
 		} catch (error) {
 			setIsLoading(false);
@@ -52,7 +48,7 @@ export const ProductProvider = ({ children }) => {
 		setIsLoading(true);
 		try {
 			await axios.delete(`/products/${productId}`);
-			setProductsState((prev) => prev.filter((product) => product._id !== productId));
+			setProducts((prev) => prev.filter((product) => product._id !== productId));
 			setIsLoading(false);
 		} catch (error) {
 			setIsLoading(false);
@@ -64,7 +60,7 @@ export const ProductProvider = ({ children }) => {
 		setIsLoading(true);
 		try {
 			const response = await axios.patch(`/products/${productId}`);
-			setProductsState((prev) =>
+			setProducts((prev) =>
 				prev.map((product) =>
 					product._id === productId ? { ...product, isFeatured: response.data.isFeatured } : product
 				)
@@ -80,7 +76,7 @@ export const ProductProvider = ({ children }) => {
 		setIsLoading(true);
 		try {
 			const response = await axios.get("/products/featured");
-			setProductsState(response.data);
+			setProducts(response.data);
 			setIsLoading(false);
 		} catch (error) {
 			setIsLoading(false);
@@ -104,4 +100,8 @@ export const ProductProvider = ({ children }) => {
 			{children}
 		</ProductContext.Provider>
 	);
+};
+
+export const useProduct = () => {
+	return useContext(ProductContext);
 };

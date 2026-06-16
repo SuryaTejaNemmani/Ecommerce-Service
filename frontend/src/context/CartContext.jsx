@@ -4,22 +4,18 @@ import { toast } from "react-hot-toast";
 
 const CartContext = createContext();
 
-export const useCart = () => {
-	return useContext(CartContext);
-};
-
 export const CartProvider = ({ children }) => {
 	const [cart, setCart] = useState([]);
 	const [coupon, setCoupon] = useState(null);
 	const [isCouponApplied, setIsCouponApplied] = useState(false);
 
-    // Derived state for totals
-    const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    let total = subtotal;
-    if (coupon && isCouponApplied) {
-        const discount = subtotal * (coupon.discountPercentage / 100);
-        total = subtotal - discount;
-    }
+	// Derived state for totals
+	const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+	let total = subtotal;
+	if (coupon && isCouponApplied) {
+		const discount = subtotal * (coupon.discountPercentage / 100);
+		total = subtotal - discount;
+	}
 
 	const getMyCoupon = async () => {
 		try {
@@ -70,9 +66,9 @@ export const CartProvider = ({ children }) => {
 			setCart((prevCart) => {
 				const existingItem = prevCart.find((item) => item._id === product._id);
 				if (existingItem) {
-                    return prevCart.map((item) => (item._id === product._id ? { ...item, quantity: item.quantity + 1 } : item));
-                }
-                return [...prevCart, { ...product, quantity: 1 }];
+					return prevCart.map((item) => (item._id === product._id ? { ...item, quantity: item.quantity + 1 } : item));
+				}
+				return [...prevCart, { ...product, quantity: 1 }];
 			});
 		} catch (error) {
 			toast.error(error.response?.data?.message || "An error occurred");
@@ -96,9 +92,9 @@ export const CartProvider = ({ children }) => {
 
 		try {
 			await axios.put(`/cart/${productId}`, { quantity });
-			setCart((prevCart) => 
-                prevCart.map((item) => (item._id === productId ? { ...item, quantity } : item))
-            );
+			setCart((prevCart) =>
+				prevCart.map((item) => (item._id === productId ? { ...item, quantity } : item))
+			);
 		} catch (error) {
 			console.error("Error updating quantity", error);
 		}
@@ -126,3 +122,7 @@ export const CartProvider = ({ children }) => {
 		</CartContext.Provider>
 	);
 };
+
+export const useCart = () => {
+	return useContext(CartContext);
+}

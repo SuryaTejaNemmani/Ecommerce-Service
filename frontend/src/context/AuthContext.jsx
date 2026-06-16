@@ -4,16 +4,12 @@ import { toast } from "react-hot-toast";
 
 const AuthContext = createContext();
 
-export const useAuth = () => {
-    return useContext(AuthContext);
-};
-
 export const AuthProvider = ({ children }) => {
 	const [user, setUser] = useState(null);
 	const [loading, setLoading] = useState(false);
 	const [checkingAuth, setCheckingAuth] = useState(true);
 
-	const signup = async ({ name, email, password, confirmPassword }) => {
+	const signup = async ({ name, email, password, confirmPassword, role }) => {
 		setLoading(true);
 
 		if (password !== confirmPassword) {
@@ -22,7 +18,7 @@ export const AuthProvider = ({ children }) => {
 		}
 
 		try {
-			const res = await axios.post("/auth/signup", { name, email, password });
+			const res = await axios.post("/auth/signup", { name, email, password, role });
 			const { token, ...userData } = res.data;
 			localStorage.setItem("token", token);
 			setUser(userData);
@@ -30,6 +26,7 @@ export const AuthProvider = ({ children }) => {
 		} catch (error) {
 			setLoading(false);
 			toast.error(error.response?.data?.message || "An error occurred");
+			console.log(error);
 		}
 	};
 
@@ -45,6 +42,7 @@ export const AuthProvider = ({ children }) => {
 		} catch (error) {
 			setLoading(false);
 			toast.error(error.response?.data?.message || "An error occurred");
+			console.log(error);
 		}
 	};
 
@@ -77,17 +75,21 @@ export const AuthProvider = ({ children }) => {
 			localStorage.removeItem("token");
 			setUser(null);
 		} finally {
-            setCheckingAuth(false);
-        }
+			setCheckingAuth(false);
+		}
 	};
 
-    useEffect(() => {
-        checkAuth();
-    }, []);
+	useEffect(() => {
+		checkAuth();
+	}, []);
 
 	return (
 		<AuthContext.Provider value={{ user, loading, checkingAuth, signup, login, logout, checkAuth }}>
 			{children}
 		</AuthContext.Provider>
 	);
+};
+
+export const useAuth = () => {
+	return useContext(AuthContext);
 };

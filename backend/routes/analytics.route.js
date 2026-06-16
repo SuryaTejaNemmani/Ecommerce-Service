@@ -1,5 +1,5 @@
 import express from "express";
-import { adminRoute, protectRoute } from "../middleware/auth.middleware.js";
+import { adminRoute, protectRoute, sellerOrAdminRoute } from "../middleware/auth.middleware.js";
 import {
   getAnalyticsData,
   getDailySalesData,
@@ -7,14 +7,17 @@ import {
 
 const router = express.Router();
 
-router.get("/", protectRoute, adminRoute, async (req, res) => {
+router.get("/", protectRoute, sellerOrAdminRoute, async (req, res) => {
   try {
-    const analyticsData = await getAnalyticsData();
+    const isPersonal = req.query.personal === "true";
+    const roleToUse = (req.user.role === "admin" && !isPersonal) ? "admin" : "seller";
+
+    const analyticsData = await getAnalyticsData(req.user._id, roleToUse);
 
     const endDate = new Date();
-    const startDate = new Date(endDate.getTime() - 3 * 24 * 60 * 60 * 1000);
+    const startDate = new Date(endDate.getTime() - 7 * 24 * 60 * 60 * 1000);
 
-    const dailySalesData = await getDailySalesData(startDate, endDate);
+    const dailySalesData = await getDailySalesData(startDate, endDate, req.user._id, roleToUse);
 
     res.json({
       analyticsData,

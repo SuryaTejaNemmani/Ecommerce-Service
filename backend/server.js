@@ -14,9 +14,8 @@ import analyticsRoutes from "./routes/analytics.route.js";
 import { connectDB } from "./lib/db.js";
 
 dotenv.config();
-const app= express();
+const app = express();
 const PORT = process.env.PORT || 5000;
-const __dirname = path.resolve();
 
 app.use(express.json()); // allows you to parse the body of the request
 
@@ -25,19 +24,16 @@ app.use(express.json()); // allows you to parse the body of the request
 app.use(cors({
   origin: 'http://localhost:5173',
 }));
-app.use("/api/auth",authRoutes);
-app.use("/api/products",productRoutes);
-app.use("/api/cart",cartRoutes);
-app.use("/api/coupons",couponRoutes);
-app.use("/api/payments",paymentRoutes);
-app.use("/api/analytics",analyticsRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/products", productRoutes);
+app.use("/api/cart", cartRoutes);
+app.use("/api/coupons", couponRoutes);
+app.use("/api/payments", paymentRoutes);
+app.use("/api/analytics", analyticsRoutes);
 
 
 
-app.listen(PORT,() => 
-{
-    console.log("Server is running on http://localhost:"+PORT);
-    connectDB();
+app.listen(PORT, () => {
+  console.log("Server is running on http://localhost:" + PORT);
+  connectDB();
 });
-
-//pan18zL9H8GZRlpI

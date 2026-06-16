@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 import { useCart } from "../context/CartContext";
 import { Link } from "react-router-dom";
 import { MoveRight } from "lucide-react";
-import { loadRazorpayScript } from "../utils/razorpay";
 import axios from "../lib/axios";
 
 const OrderSummary = () => {
@@ -16,17 +15,10 @@ const OrderSummary = () => {
 
 	const handleRazorpayCheckout = async () => {
 		try {
-			const res = await loadRazorpayScript("https://checkout.razorpay.com/v1/checkout.js");
-
-			if (!res) {
-				alert("Razorpay SDK failed to load. Are you online?");
-				return;
-			}
-
 			// 1. Create order on backend
 			const response = await axios.post("/payments/create-order", {
 				products: cart,
-				couponCode: coupon ? coupon.code : null,
+				couponCode: isCouponApplied ? coupon.code : null,
 			});
 
 			const { orderId, currency, amount, keyId } = response.data;
@@ -46,7 +38,7 @@ const OrderSummary = () => {
 						razorpay_order_id: response.razorpay_order_id,
 						razorpay_signature: response.razorpay_signature,
 						products: cart,
-						couponCode: coupon ? coupon.code : null,
+						couponCode: isCouponApplied ? coupon.code : null,
 					};
 
 					const verifyResponse = await axios.post("/payments/verify-payment", data);

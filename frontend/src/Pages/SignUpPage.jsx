@@ -11,6 +11,7 @@ const SignUpPage = () => {
 		email: "",
 		password: "",
 		confirmPassword: "",
+		role: "customer",
 	});
 
 	const { signup, loading } = useAuth();
@@ -99,6 +100,23 @@ const SignUpPage = () => {
 								className='form-input form-input--padded'
 								placeholder='••••••••'
 							/>
+						</div>
+					</div>
+
+					<div className='form-group'>
+						<label htmlFor='role' className='form-label'>Account Type</label>
+						<div className='form-input-wrap'>
+							<UserPlus className='form-icon' size={20} />
+							<select
+								id='role'
+								value={formData.role}
+								onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+								className='form-input form-input--padded'
+								style={{ appearance: 'none', cursor: 'pointer' }}
+							>
+								<option value='customer'>Customer (Buyer)</option>
+								<option value='seller'>Seller (Vendor)</option>
+							</select>
 						</div>
 					</div>
 

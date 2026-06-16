@@ -1,52 +1,75 @@
 import Order from "../models/order.model.js";
 import Product from "../models/product.model.js";
 import User from "../models/user.model.js";
+import mongoose from "mongoose";
 
-export const getAnalyticsData = async () => {
-	const totalUsers = await User.countDocuments();
-	const totalProducts = await Product.countDocuments();
+export const getAnalyticsData = async (userId, role) => {
+	const isAdmin = role === "admin";
+	
+	const totalUsers = isAdmin ? await User.countDocuments() : null;
+	const totalProducts = await Product.countDocuments(isAdmin ? {} : { seller: userId });
 
-	const salesData = await Order.aggregate([
-		{
-			$group: {
-				_id: null,
-				totalSales: { $sum: 1 },
-				totalRevenue: { $sum: "$totalAmount" },
-			},
+	// Base aggregation for sales and revenue
+	const salesStatsPipeline = [
+		{ $unwind: "$products" },
+	];
+
+	if (!isAdmin) {
+		// Filter by seller's products
+		salesStatsPipeline.push({
+			$lookup: {
+				from: "products",
+				localField: "products.product",
+				foreignField: "_id",
+				as: "productDetail"
+			}
+		});
+		salesStatsPipeline.push({ $unwind: "$productDetail" });
+		salesStatsPipeline.push({ $match: { "productDetail.seller": new mongoose.Types.ObjectId(userId) } });
+	}
+
+	salesStatsPipeline.push({
+		$group: {
+			_id: null,
+			totalSales: { $sum: "$products.quantity" },
+			totalRevenue: { $sum: { $multiply: ["$products.price", "$products.quantity"] } },
 		},
-	]);
+	});
 
+	const salesData = await Order.aggregate(salesStatsPipeline);
 	const { totalSales, totalRevenue } = salesData[0] || { totalSales: 0, totalRevenue: 0 };
 
 	// Get sales per product
-	const productSalesData = await Order.aggregate([
+	const productSalesPipeline = [
 		{ $unwind: "$products" },
-		{
-			$group: {
-				_id: "$products.product",
-				sales: { $sum: "$products.quantity" },
-				revenue: { $sum: { $multiply: ["$products.price", "$products.quantity"] } },
-			},
-		},
 		{
 			$lookup: {
 				from: "products",
-				localField: "_id",
+				localField: "products.product",
 				foreignField: "_id",
 				as: "productDetails",
 			},
 		},
 		{ $unwind: "$productDetails" },
+	];
+
+	if (!isAdmin) {
+		productSalesPipeline.push({ $match: { "productDetails.seller": new mongoose.Types.ObjectId(userId) } });
+	}
+
+	productSalesPipeline.push(
 		{
-			$project: {
-				_id: 1,
-				name: "$productDetails.name",
-				sales: 1,
-				revenue: 1,
+			$group: {
+				_id: "$products.product",
+				name: { $first: "$productDetails.name" },
+				sales: { $sum: "$products.quantity" },
+				revenue: { $sum: { $multiply: ["$products.price", "$products.quantity"] } },
 			},
 		},
-		{ $sort: { sales: -1 } },
-	]);
+		{ $sort: { sales: -1 } }
+	);
+
+	const productSalesData = await Order.aggregate(productSalesPipeline);
 
 	return {
 		users: totalUsers,
@@ -57,9 +80,11 @@ export const getAnalyticsData = async () => {
 	};
 };
 
-export const getDailySalesData = async (startDate, endDate) => {
+export const getDailySalesData = async (startDate, endDate, userId, role) => {
 	try {
-		const dailySalesData = await Order.aggregate([
+		const isAdmin = role === "admin";
+		
+		const pipeline = [
 			{
 				$match: {
 					createdAt: {
@@ -68,27 +93,34 @@ export const getDailySalesData = async (startDate, endDate) => {
 					},
 				},
 			},
-			{
-				$group: {
-					_id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
-					sales: { $sum: 1 },
-					revenue: { $sum: "$totalAmount" },
-				},
-			},
-			{ $sort: { _id: 1 } },
-		]);
+			{ $unwind: "$products" }
+		];
 
-		// example of dailySalesData
-		// [
-		// 	{
-		// 		_id: "2024-08-18",
-		// 		sales: 12,
-		// 		revenue: 1450.75
-		// 	},
-		// ]
+		if (!isAdmin) {
+			pipeline.push({
+				$lookup: {
+					from: "products",
+					localField: "products.product",
+					foreignField: "_id",
+					as: "productDetail"
+				}
+			});
+			pipeline.push({ $unwind: "$productDetail" });
+			pipeline.push({ $match: { "productDetail.seller": new mongoose.Types.ObjectId(userId) } });
+		}
+
+		pipeline.push({
+			$group: {
+				_id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+				sales: { $sum: "$products.quantity" },
+				revenue: { $sum: { $multiply: ["$products.price", "$products.quantity"] } },
+			},
+		});
+		pipeline.push({ $sort: { _id: 1 } });
+
+		const dailySalesData = await Order.aggregate(pipeline);
 
 		const dateArray = getDatesInRange(startDate, endDate);
-		// console.log(dateArray) // ['2024-08-18', '2024-08-19', ... ]
 
 		return dateArray.map((date) => {
 			const foundData = dailySalesData.find((item) => item._id === date);

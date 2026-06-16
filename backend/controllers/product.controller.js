@@ -3,7 +3,14 @@ import cloudinary from "../lib/cloudinary.js";
 
 export const getAllProducts = async (req, res) => {
   try {
-    const products = await Product.find({});
+    let products;
+    if (req.user.role === "admin") {
+      // Admin sees all products across all sellers
+      products = await Product.find({}).populate("seller", "name email");
+    } else {
+      // Seller sees only their own products
+      products = await Product.find({ seller: req.user._id });
+    }
     res.json({ products });
   } catch (error) {
     console.log("Error in getAllProducts Controller", error.message);
@@ -43,6 +50,7 @@ export const createProduct = async (req, res) => {
       price,
       image: cloudinaryResponse?.secure_url ? cloudinaryResponse.secure_url : "",
       category,
+      seller: req.user._id,  // Automatically link to the logged-in seller/admin
     });
 
     res.status(201).json(product);
@@ -58,6 +66,11 @@ export const deleteProduct = async (req, res) => {
 
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
+    }
+
+    // Sellers can only delete their own products; admins can delete any
+    if (req.user.role === "seller" && product.seller.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "You can only delete your own products" });
     }
 
     if (product.image) {

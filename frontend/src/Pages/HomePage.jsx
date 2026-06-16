@@ -36,7 +36,7 @@ const HomePage = () => {
 				))}
 			</div>
 
-			{/* {!isLoading && products.length > 0 && <FeaturedProducts featuredProducts={products} />} */}
+			{!isLoading && products.length > 0 && <FeaturedProducts featuredProducts={products} />}
 		</div>
 	);
 };

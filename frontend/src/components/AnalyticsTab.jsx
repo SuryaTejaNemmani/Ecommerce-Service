@@ -2,10 +2,12 @@ import './AnalyticsTab.css';
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import axios from "../lib/axios";
-import { Users, Package, ShoppingCart, IndianRupee } from "lucide-react";
+import { Users, Package, ShoppingCart, IndianRupee, User as UserIcon, Globe } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import { useAuth } from "../context/AuthContext";
 
 const AnalyticsTab = () => {
+	const { user } = useAuth();
 	const [analyticsData, setAnalyticsData] = useState({
 		users: 0,
 		products: 0,
@@ -14,11 +16,13 @@ const AnalyticsTab = () => {
 	});
 	const [isLoading, setIsLoading] = useState(true);
 	const [dailySalesData, setDailySalesData] = useState([]);
+	const [isPersonal, setIsPersonal] = useState(false);
 
 	useEffect(() => {
 		const fetchAnalyticsData = async () => {
+			setIsLoading(true);
 			try {
-				const response = await axios.get("/analytics");
+				const response = await axios.get(`/analytics?personal=${isPersonal}`);
 				setAnalyticsData(response.data.analyticsData);
 				setDailySalesData(response.data.dailySalesData);
 			} catch (error) {
@@ -29,20 +33,41 @@ const AnalyticsTab = () => {
 		};
 
 		fetchAnalyticsData();
-	}, []);
+	}, [isPersonal]);
 
 	if (isLoading) {
 		return <div>Loading...</div>;
 	}
 
 	return (
-		<div>
+		<div className='analytics-container'>
+			{user?.role === "admin" && (
+				<div className='analytics-toggle'>
+					<button 
+						className={`toggle-btn ${!isPersonal ? 'active' : ''}`}
+						onClick={() => setIsPersonal(false)}
+					>
+						<Globe size={18} />
+						Platform View
+					</button>
+					<button 
+						className={`toggle-btn ${isPersonal ? 'active' : ''}`}
+						onClick={() => setIsPersonal(true)}
+					>
+						<UserIcon size={18} />
+						My Sales
+					</button>
+				</div>
+			)}
+
 			<div className='analytics-grid'>
-				<AnalyticsCard
-					title='Total Users'
-					value={analyticsData.users.toLocaleString()}
-					icon={Users}
-				/>
+				{analyticsData.users !== null && (
+					<AnalyticsCard
+						title='Total Users'
+						value={analyticsData.users.toLocaleString()}
+						icon={Users}
+					/>
+				)}
 				<AnalyticsCard
 					title='Total Products'
 					value={analyticsData.products.toLocaleString()}

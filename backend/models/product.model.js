@@ -30,6 +30,11 @@ const productSchema = new mongoose.Schema({
     isFeatured:{
         type: Boolean,
         default: false
+    },
+    seller: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
     }
 },{timestamps: true});
 
